@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance Sorting App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        input {
+            margin: 5px;
+        }
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Community Service Location Finder</h1>
+    <p>Enter your latitude and longitude to find the closest locations:</p>
+
+    <label for="lat">Latitude:</label>
+    <input type="number" id="lat" placeholder="Enter Latitude" step="any">
+    <label for="lon">Longitude:</label>
+    <input type="number" id="lon" placeholder="Enter Longitude" step="any">
+    <button onclick="calculateDistances()">Find Locations</button>
+
+    <table id="results">
+        <thead>
+            <tr>
+                <th>Location</th>
+                <th>Distance (km)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        const locations = [
+            { name: "H-E-B", lat: 33.15523898825818, lon: -96.8461853148551 },
+            { name: "Hurts Donuts", lat: 33.15442597253646, lon: -96.86223103754124 },
+            { name: "Shoji Sushi & Hibachi", lat: 33.151793595999536, lon: -96.86681918249357 }
+        ];
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth radius in kilometers
+            const dLat = degreesToRadians(lat2 - lat1);
+            const dLon = degreesToRadians(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(degreesToRadians(lat1)) * Math.cos(degreesToRadians(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function degreesToRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function calculateDistances() {
+            const lat = parseFloat(document.getElementById("lat").value);
+            const lon = parseFloat(document.getElementById("lon").value);
+
+            if (isNaN(lat) || isNaN(lon)) {
+                alert("Please enter valid latitude and longitude.");
+                return;
+            }
+
+            const distances = locations.map(location => {
+                const distance = haversineDistance(lat, lon, location.lat, location.lon);
+                return { name: location.name, distance: distance.toFixed(2) };
+            });
+
+            distances.sort((a, b) => a.distance - b.distance);
+
+            displayResults(distances);
+        }
+
+        function displayResults(distances) {
+            const tbody = document.querySelector("#results tbody");
+            tbody.innerHTML = ""; // Clear existing results
+
+            distances.forEach(location => {
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                const distanceCell = document.createElement("td");
+
+                nameCell.textContent = location.name;
+                distanceCell.textContent = location.distance;
+
+                row.appendChild(nameCell);
+                row.appendChild(distanceCell);
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
